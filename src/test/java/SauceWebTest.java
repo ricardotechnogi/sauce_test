@@ -5,7 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +28,19 @@ public class SauceWebTest {
         @Before
         public void setUp() throws Exception {
             baseUrl = "http://www.technogi.com.mx/";
-            driver = SeleniumFactory.createWebDriver();
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            String version = Utils.readPropertyOrEnv("SELENIUM_VERSION", "");
+            if (!version.equals("")) {
+                capabilities.setCapability("version", version);
+            }
+            capabilities.setCapability("platform", Utils.readPropertyOrEnv("SELENIUM_PLATFORM", "XP"));
+            capabilities.setCapability("browserName", Utils.readPropertyOrEnv("SELENIUM_BROWSER", "firefox"));
+
+            String username = Utils.readPropertyOrEnv("SAUCE_USER_NAME", "");
+            String accessKey = Utils.readPropertyOrEnv("SAUCE_API_KEY", "");
+            this.driver = new RemoteWebDriver(
+                    new URL("http://" + username + ":" + accessKey + "@ondemand.saucelabs.com:80/wd/hub"),
+                    capabilities);
         }
 
         @After
